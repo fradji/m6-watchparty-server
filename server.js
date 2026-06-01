@@ -191,6 +191,27 @@ wss.on("connection", (ws) => {
         break;
       }
 
+      case "voice": {
+        // Message vocal "talkie-walkie" : clip audio encodé en base64,
+        // relayé aux autres membres de la salle.
+        const { roomId, clientId, pseudo } = ws.meta || {};
+        if (!roomId) return;
+        if (typeof msg.data !== "string" || msg.data.length > 1500000) return; // ~1 Mo max
+        broadcast(
+          roomId,
+          {
+            type: "voice",
+            data: msg.data,
+            mime: msg.mime || "audio/webm",
+            pseudo,
+            fromClientId: clientId,
+            ts: Date.now(),
+          },
+          clientId
+        );
+        break;
+      }
+
       default:
         break;
     }
