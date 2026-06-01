@@ -19,11 +19,47 @@ import { randomUUID } from "crypto";
 
 const PORT = process.env.PORT || 8080;
 
+// Politique de confidentialité servie sur /privacy (URL exigée par le Chrome Web Store).
+const PRIVACY_HTML = `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CinéSync — Politique de confidentialité</title>
+<style>body{font-family:-apple-system,"Segoe UI",Roboto,sans-serif;max-width:720px;margin:48px auto;padding:0 20px;color:#1d1d1f;line-height:1.6}h1{font-size:26px}h2{font-size:18px;margin-top:28px}.meta{color:#6b6b70;font-size:13px}code{background:#f2f2f4;padding:1px 5px;border-radius:4px}</style></head><body>
+<h1>Politique de confidentialité — CinéSync (Watch Party)</h1>
+<p class="meta">Dernière mise à jour : juin 2026</p>
+<p>CinéSync est une extension de navigateur qui permet de regarder des programmes en streaming de façon synchronisée avec d'autres personnes, avec un chat texte et un micro en direct.</p>
+<h2>Données traitées</h2>
+<ul>
+<li><strong>Pseudo</strong> que vous saisissez, pour vous identifier dans la salle.</li>
+<li><strong>Code de salle</strong> et <strong>réglages</strong>, stockés localement via l'API <code>storage</code> de Chrome.</li>
+<li><strong>Messages de chat</strong> transmis aux autres participants.</li>
+<li><strong>Événements de lecture</strong> (play, pause, avance) pour la synchronisation.</li>
+<li><strong>Audio du microphone</strong>, uniquement lorsque vous activez le micro.</li>
+</ul>
+<h2>Circulation des données</h2>
+<p>La voix est échangée <strong>directement entre participants</strong> en pair-à-pair (WebRTC). Le chat et les événements de lecture transitent par un serveur de relai uniquement pour être transmis en temps réel aux autres participants de la même salle.</p>
+<p><strong>Aucune donnée n'est enregistrée ni conservée</strong> sur le serveur : le relai est instantané et en mémoire vive. Aucun historique, aucun enregistrement audio, aucune vidéo.</p>
+<h2>Ce que nous ne faisons pas</h2>
+<ul><li>Pas de revente ni de partage à des tiers.</li><li>Pas de publicité ni de pistage.</li><li>Pas de profil utilisateur.</li></ul>
+<h2>Microphone</h2>
+<p>Le micro est capté uniquement quand vous l'activez, transmis en direct aux autres participants, et coupé dès que vous le désactivez.</p>
+<h2>Services tiers</h2>
+<p>Des serveurs STUN publics (Google) sont utilisés pour établir les connexions audio pair-à-pair ; ils ne reçoivent que des informations techniques de connexion réseau.</p>
+<h2>Contact</h2>
+<p><a href="mailto:contact@fb.ventures">contact@fb.ventures</a></p>
+<h2>Affiliation</h2>
+<p>CinéSync est une extension indépendante, ni affiliée ni approuvée par M6 ou tout autre service de streaming. Les marques citées appartiennent à leurs propriétaires respectifs.</p>
+</body></html>`;
+
 // Sert une petite page d'état + healthcheck (utile pour l'hébergement cloud)
 const httpServer = createServer((req, res) => {
   if (req.url === "/health") {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ status: "ok", rooms: rooms.size }));
+    return;
+  }
+  if (req.url === "/privacy") {
+    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+    res.end(PRIVACY_HTML);
     return;
   }
   res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
