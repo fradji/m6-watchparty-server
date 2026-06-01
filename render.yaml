@@ -1,0 +1,10 @@
+# Render Blueprint — déploie automatiquement le serveur de synchro.
+# Placé à la racine du dépôt GitHub (= contenu du dossier server/).
+services:
+  - type: web
+    name: m6-watchparty
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
