@@ -191,24 +191,16 @@ wss.on("connection", (ws) => {
         break;
       }
 
-      case "voice": {
-        // Message vocal "talkie-walkie" : clip audio encodé en base64,
-        // relayé aux autres membres de la salle.
-        const { roomId, clientId, pseudo } = ws.meta || {};
+      case "signal": {
+        // Signalisation WebRTC (micro en direct, type Zoom).
+        // Relai ciblé : on transmet uniquement au destinataire `to`.
+        const { roomId, clientId } = ws.meta || {};
         if (!roomId) return;
-        if (typeof msg.data !== "string" || msg.data.length > 1500000) return; // ~1 Mo max
-        broadcast(
-          roomId,
-          {
-            type: "voice",
-            data: msg.data,
-            mime: msg.mime || "audio/webm",
-            pseudo,
-            fromClientId: clientId,
-            ts: Date.now(),
-          },
-          clientId
-        );
+        const room = rooms.get(roomId);
+        const target = room && room.get(msg.to);
+        if (target) {
+          send(target.ws, { type: "signal", from: clientId, kind: msg.kind, payload: msg.payload });
+        }
         break;
       }
 
